@@ -93,4 +93,8 @@ function balas(status, isi) {
   });
 }
 
-export const config = { path: '/terima-data-ea' };
+// Sengaja TIDAK memakai custom path (export const config = { path: ... }).
+// Fungsi ini diakses lewat alamat default Netlify:
+//   https://jagal.fun/.netlify/functions/terima-data
+// Alamat default ini terbukti bisa dijangkau (sama seperti ea), sedangkan
+// custom path sempat menghasilkan 404.
