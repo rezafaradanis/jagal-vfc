@@ -1,0 +1,59 @@
+[functions]
+  directory = "functions"
+
+# Jaring pengaman: kalau custom path routing dari `export const config`
+# di dalam functions/ea.mjs (path: '/ea/*') tidak ter-pickup oleh CDN
+# untuk alasan apa pun, redirect eksplisit ini memastikan /ea/* tetap
+# diteruskan ke function-nya lewat alamat default Netlify Functions.
+[[redirects]]
+  from = "/ea/*"
+  to = "/.netlify/functions/ea/:splat"
+  status = 200
+  force = true
+
+# Redirect eksplisit per halaman — sengaja tidak pakai wildcard "/*" supaya
+# tidak menelan jalur "/ea/*" yang dipakai oleh functions/ea.mjs.
+[[redirects]]
+  from = "/skuad"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/statistik"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/hasil"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/divisi"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/jersey"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/mitra"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/ipl"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/discord"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/trial"
+  to = "/index.html"
+  status = 200

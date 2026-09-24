@@ -1,0 +1,9 @@
+{
+  "name": "jagal-vfc-situs",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Situs resmi JAGAL VFC — EA SPORTS FC Pro Clubs",
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}
