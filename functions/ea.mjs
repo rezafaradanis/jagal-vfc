@@ -156,3 +156,4 @@ function balas(status, isi) {
   });
 }
 
+export const config = { path: '/ea/*' };

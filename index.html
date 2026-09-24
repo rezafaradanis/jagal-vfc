@@ -782,10 +782,7 @@ function nilaiStatistik(p, kolom){
     case 'main': return p.main||0;
     case 'gol': return p.gol||0;
     case 'assist': return p.assist||0;
-    case 'passAkurasi': return p.passAkurasi ?? -1;
     case 'motmMusim': return p.motmMusim||0;
-    case 'kartuKuning': return p.kartuKuning||0;
-    case 'kartuMerah': return p.kartuMerah||0;
     case 'rating': return p.rating||0;
     default: return 0;
   }
@@ -799,7 +796,6 @@ function nilaiSkuad(p, kolom){
     case 'gol': return p.gk ? (p.gkCleanSheet||0) : (p.gol||0);
     case 'assist': return p.gk ? (p.gkSave||0) : (p.assist||0);
     case 'motmMusim': return p.motmMusim||0;
-    case 'kartuMerah': return p.kartuMerah||0;
     default: return 0;
   }
 }
@@ -890,7 +886,6 @@ function render(){
           <option value="gol">Gol (Kiper: Clean Sheet)</option>
           <option value="assist">Assist (Kiper: Save)</option>
           <option value="motmMusim">MOTM</option>
-          <option value="kartuMerah">Kartu Merah</option>
         </select>
         <button type="button" class="btn-arah-sortir" id="sortirSkuadArah">
           <span id="sortirSkuadArahIkon">↓</span> <span id="sortirSkuadArahTeks">Terbesar dulu</span>
@@ -961,10 +956,7 @@ function render(){
       { key:'main',        label:'Main',   sortir:true },
       { key:'gol',         label:'Gol',    sortir:true },
       { key:'assist',      label:'Assist', sortir:true },
-      { key:'passAkurasi', label:'Pass %', sortir:true },
       { key:'motmMusim',   label:'MOTM',   sortir:true },
-      { key:'kartuKuning', label:'🟨',     sortir:true },
-      { key:'kartuMerah',  label:'🟥',     sortir:true },
       { key:'rating',      label:'Rating', sortir:true },
     ];
     isi += `<div class="tbl-wrap"><table><thead><tr>` + kolomTabel.map(k=>{
@@ -975,8 +967,7 @@ function render(){
     }).join('') + `</tr></thead><tbody>` + pemainOutfield.map(p=>`
       <tr><td>${p.no}</td><td>${escapeHtml(p.nama)}</td><td>${p.pos}</td>
       <td>${p.main}</td><td>${p.gol}</td><td>${p.assist}</td>
-      <td>${p.passAkurasi!=null ? p.passAkurasi+'%' : '–'}</td><td>${p.motmMusim??0}</td>
-      <td>${p.kartuKuning??0}</td><td>${p.kartuMerah??0}</td>
+      <td>${p.motmMusim??0}</td>
       <td>${p.rating.toFixed(1)}</td></tr>`
     ).join('') + `</tbody></table></div>`;
 
@@ -1375,10 +1366,7 @@ function bukaModalPemain(p){
     <div class="modal-stat"><b>${p.gol}</b><span>Gol</span></div>
     <div class="modal-stat"><b>${p.assist}</b><span>Assist</span></div>
     <div class="modal-stat"><b>${p.rating.toFixed(1)}</b><span>Rating</span></div>
-    <div class="modal-stat"><b>${p.passAkurasi!=null ? p.passAkurasi+'%' : '–'}</b><span>Pass Akurasi</span></div>
     <div class="modal-stat"><b>${p.motmMusim??0}</b><span>MOTM (Semua Laga)</span></div>
-    <div class="modal-stat"><b>${p.kartuKuning??0}</b><span>Kartu Kuning</span></div>
-    <div class="modal-stat"><b>${p.kartuMerah??0}</b><span>Kartu Merah</span></div>
   `;
 
   isi.innerHTML = `
