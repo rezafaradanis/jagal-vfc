@@ -87,4 +87,6 @@ function balas(status, isi) {
   });
 }
 
-export const config = { path: '/trial-submit' };
+// Sengaja TANPA custom path: fungsi dipanggil lewat alamat bawaan Netlify
+// (/.netlify/functions/trial). Custom path membuat alamat bawaan mati dan
+// sempat menyebabkan 404.

@@ -34,6 +34,19 @@ import { getStore } from '@netlify/blobs';
 const LANGSUNG = 'https://proclubs.ea.com/api/fc';
 const BATAS_MS = 8000;
 const CACHE_TTL_MS = 3 * 60 * 1000; // 3 menit — cukup segar, cukup jarang memanggil EA.
+const LAPTOP_TTL_MS = 30 * 60 * 1000; // data kiriman laptop dipakai langsung sampai 30 menit.
+
+// Kunci cache tanpa karakter khusus (?, &, =) supaya aman disimpan dan dibaca
+// Netlify Blobs. HARUS sama persis dengan fungsi yang sama di terima-data.mjs.
+// Parameter "_" (penanda anti-cache) diabaikan, urutan parameter disamakan.
+function buatKunciCache(jalur, search) {
+  const p = new URLSearchParams(search || '');
+  p.delete('_');
+  const pasangan = [...p.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}-${v}`);
+  return `${jalur}__${pasangan.join('_')}`.replace(/[^A-Za-z0-9_.-]/g, '-');
+}
 const UA_BROWSER = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
 
 export default async (req) => {
@@ -48,22 +61,28 @@ export default async (req) => {
     .replace(/^\/+/, '');
   if (!jalur) return balas(400, { galat: 'Jalur EA tidak disebutkan.' });
 
-  const kunciCache = `${jalur}?${masuk.search}`;
+  const kunciCache = buatKunciCache(jalur, masuk.search);
   const store = getStore('cache-ea');
 
   // 1) Coba cache bersama dulu — kalau masih segar, langsung pakai tanpa panggil EA.
+  //    Data kiriman laptop (sumber: 'laptop') dianggap segar lebih lama, karena
+  //    laptop mengirim ulang tiap 10 menit selama menyala.
   let entriCache = null;
+  let galatCache = null;
   try {
     entriCache = await store.get(kunciCache, { type: 'json' });
-  } catch { /* cache miss atau blobs tidak tersedia — lanjut fetch biasa */ }
+  } catch (e) { galatCache = e.message; }
 
-  if (entriCache && (Date.now() - entriCache.waktu) < CACHE_TTL_MS) {
+  const umurCache = entriCache ? Date.now() - entriCache.waktu : Infinity;
+  const batasSegar = entriCache?.sumber === 'laptop' ? LAPTOP_TTL_MS : CACHE_TTL_MS;
+  if (entriCache && umurCache < batasSegar) {
     return new Response(entriCache.teks, {
       status: 200,
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
         'Access-Control-Allow-Origin': '*',
-        'X-Sumber-Cache': 'hit',
+        'X-Sumber-Cache': entriCache.sumber === 'laptop' ? 'laptop' : 'hit',
+        'X-Cache-Umur-Ms': String(umurCache),
       },
     });
   }
@@ -119,6 +138,8 @@ export default async (req) => {
   return balas(502, {
     galat: percobaanTerakhir?.abort ? 'Data EA tidak terjangkau.' : 'Data EA tidak tersedia saat ini.',
     status: percobaanTerakhir?.status ?? null,
+    kunciCache,
+    galatCache,
     catatan: percobaanTerakhir?.abort
       ? `tidak menjawab dalam ${BATAS_MS} ms`
       : (percobaanTerakhir?.teks || '').includes('Access Denied')
@@ -156,4 +177,6 @@ function balas(status, isi) {
   });
 }
 
-export const config = { path: '/ea/*' };
+// Sengaja TANPA custom path: fungsi dipanggil lewat alamat bawaan Netlify
+// (/.netlify/functions/ea/...). Custom path membuat alamat bawaan mati dan
+// sempat menyebabkan 404.

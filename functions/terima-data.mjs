@@ -48,12 +48,8 @@ export default async (req) => {
   }
 
   // payload berbentuk: { entri: [ { jalur: 'members/stats', pencarian: 'platform=...&clubId=...', data: {...} }, ... ] }
-  // PENTING: format kunci cache di sini HARUS SAMA PERSIS dengan yang dibuat
-  // functions/ea.mjs, yaitu `${jalur}?${masuk.search}` di mana `masuk.search`
-  // adalah URL.search bawaan JavaScript yang SUDAH mengandung tanda "?" di
-  // depannya kalau ada query string (atau string kosong kalau tidak ada).
-  // Jadi hasilnya sengaja jadi "jalur??query..." (dua tanda tanya) — ini
-  // meniru persis perilaku ea.mjs, BUKAN kesalahan ketik di sini.
+  // PENTING: kunci cache dibuat oleh buatKunciCache() di bawah, yang HARUS
+  // sama persis dengan fungsi bernama sama di functions/ea.mjs.
   const entri = Array.isArray(payload?.entri) ? payload.entri : null;
   if (!entri || !entri.length) {
     return balas(400, { galat: 'Field "entri" kosong atau tidak berbentuk array.' });
@@ -69,9 +65,7 @@ export default async (req) => {
       detail.push({ jalur: jalur || '(kosong)', ok: false, sebab: 'jalur atau data kosong' });
       continue;
     }
-    const pencarianMentah = String(item?.pencarian || '').replace(/^\?/, '');
-    const search = pencarianMentah ? `?${pencarianMentah}` : '';
-    const kunciCache = `${jalur}?${search}`; // sengaja meniru `${jalur}?${masuk.search}` di ea.mjs
+    const kunciCache = buatKunciCache(jalur, String(item?.pencarian || '').replace(/^\?/, ''));
     try {
       const teks = typeof item.data === 'string' ? item.data : JSON.stringify(item.data);
       await store.setJSON(kunciCache, { teks, waktu: Date.now(), sumber: 'laptop' });
@@ -85,6 +79,16 @@ export default async (req) => {
   console.log(`Update dari laptop: ${tersimpan}/${entri.length} entri tersimpan ke cache.`);
   return balas(200, { ok: true, tersimpan, total: entri.length, detail });
 };
+
+// HARUS sama persis dengan buatKunciCache di ea.mjs.
+function buatKunciCache(jalur, search) {
+  const p = new URLSearchParams(search || '');
+  p.delete('_');
+  const pasangan = [...p.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}-${v}`);
+  return `${jalur}__${pasangan.join('_')}`.replace(/[^A-Za-z0-9_.-]/g, '-');
+}
 
 function balas(status, isi) {
   return new Response(JSON.stringify(isi, null, 2), {
