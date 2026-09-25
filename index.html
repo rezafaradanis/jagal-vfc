@@ -930,8 +930,10 @@ function pillSumber(){
     kelas = 'mati';
     teks = `Data EA belum tersedia — menampilkan data cadangan (update terakhir: ${SNAPSHOT_TANGGAL})`;
   } else if(!WAKTU_DATA_EA){
-    kelas = 'live';
-    teks = 'Data EA Pro Clubs';
+    // Waktu pengambilan tidak diketahui (mis. fungsi ea versi lama) — jangan
+    // tampil hijau seolah pasti baru.
+    kelas = '';
+    teks = 'Data EA Pro Clubs · waktu pembaruan tidak diketahui';
   } else {
     const umur = Date.now() - WAKTU_DATA_EA;
     const segar = umur <= BATAS_SEGAR_MS;
