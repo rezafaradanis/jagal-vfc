@@ -134,54 +134,47 @@
   .shield-wrap{position:relative;width:178px;cursor:pointer;
     transition:transform .18s ease;}
   .shield-wrap:hover{transform:translateY(-6px);}
-  .shield{position:relative;width:100%;aspect-ratio:0.72;
-    clip-path:polygon(0% 8%, 15% 0%, 50% 6%, 85% 0%, 100% 8%, 100% 72%, 50% 100%, 0% 72%);
-    padding:16px 14px 0;box-shadow:0 10px 24px rgba(0,0,0,.4);
-    transition:box-shadow .18s ease;}
-  .shield-wrap:hover .shield{box-shadow:0 16px 34px rgba(0,0,0,.5);}
-  .shield::after{content:"";position:absolute;inset:0;
-    clip-path:polygon(0% 8%, 15% 0%, 50% 6%, 85% 0%, 100% 8%, 100% 72%, 50% 100%, 0% 72%);
-    box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35), inset 0 1px 12px rgba(255,255,255,.15);
-    pointer-events:none;}
+  /* Latar kartu = gambar template (aset/kartu-*.png). Posisi isi memakai persen
+     supaya selalu pas dengan area template: atas 0–49% (rating & foto),
+     garis mengkilap 50–57% (nama), area bergaris 58–81% (statistik),
+     bagian bawah 83–99% (bendera & logo). */
+  .shield{position:relative;width:100%;aspect-ratio:2/3;--tinta:#241a04;
+    background:center/100% 100% no-repeat;
+    filter:drop-shadow(0 10px 16px rgba(0,0,0,.45));transition:filter .18s ease;}
+  .shield-wrap:hover .shield{filter:drop-shadow(0 16px 26px rgba(0,0,0,.6));}
 
-  .shield .foto-pemain{position:relative;display:block;z-index:1;pointer-events:none;
-    width:auto;height:78px;max-width:94%;object-fit:contain;margin:2px auto 0;}
-  .shield.ada-foto .nama-pemain{font-size:11.5px;margin-top:4px;min-height:0;
-    -webkit-line-clamp:1;}
+  .shield.tier-emas{background-image:url('/aset/kartu-emas.png');--tinta:#2b1f03;}
+  .shield.tier-perak{background-image:url('/aset/kartu-perak.png');--tinta:#1c232c;}
+  .shield.tier-perunggu{background-image:url('/aset/kartu-perunggu.png');--tinta:#2c1a0e;}
+  .shield.tier-gk{background-image:url('/aset/kartu-kiper.png');--tinta:#05281f;}
 
-  /* Tier warna shield */
-  .shield.tier-emas{background:linear-gradient(155deg,#f6d16a 0%,#caa02f 45%,#8a6a1a 100%);}
-  .shield.tier-perak{background:linear-gradient(155deg,#e6e9ee 0%,#a9b2bd 45%,#6b7480 100%);}
-  .shield.tier-perunggu{background:linear-gradient(155deg,#e0a878 0%,#a9713f 45%,#6e4826 100%);}
-  .shield.tier-gk{background:linear-gradient(155deg,#7fd9c4 0%,#2f9c84 45%,#155e4f 100%);}
-
-  .shield .rating-pos{position:relative;z-index:1;}
+  .shield .rating-pos{position:absolute;top:10%;left:12%;z-index:2;text-align:center;}
   .shield .rating-pos b{display:block;font-size:30px;font-weight:900;line-height:1;
-    color:#241a04;text-shadow:0 1px 0 rgba(255,255,255,.25);}
-  .shield .rating-pos span{display:block;font-size:13px;font-weight:800;color:#241a04;
-    letter-spacing:.5px;margin-top:1px;}
+    color:var(--tinta);text-shadow:0 1px 0 rgba(255,255,255,.3);}
+  .shield .rating-pos span{display:block;font-size:13px;font-weight:800;color:var(--tinta);
+    letter-spacing:.5px;margin-top:2px;}
 
-  .shield .nama-pemain{position:relative;z-index:1;text-align:center;font-weight:900;
-    font-size:14px;color:#241a04;margin-top:10px;line-height:1.2;
-    text-shadow:0 1px 0 rgba(255,255,255,.2);
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-    min-height:2.4em;}
+  /* Foto berdiri tepat di atas garis mengkilap */
+  .shield .foto-pemain{position:absolute;z-index:1;pointer-events:none;
+    bottom:50%;right:6%;height:44%;width:auto;max-width:66%;object-fit:contain;object-position:bottom;}
+  .shield .foto-pemain.foto-kosong{height:26%;bottom:58%;right:14%;opacity:.16;filter:grayscale(1);}
 
-  .shield hr.garis-shield{position:relative;z-index:1;border:none;
-    border-top:1.5px solid rgba(36,26,4,.35);margin:8px 14px 10px;}
+  .shield .nama-pemain{position:absolute;z-index:2;top:50%;height:7%;left:6%;right:6%;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:900;font-size:12.5px;letter-spacing:-.2px;color:var(--tinta);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 0 rgba(255,255,255,.25);}
 
-  .shield .stat-baris{position:relative;z-index:1;display:flex;justify-content:center;
-    gap:14px;margin-bottom:8px;}
+  .shield hr.garis-shield{display:none;}
+
+  .shield .stat-baris{position:absolute;z-index:2;top:59%;height:21%;left:9%;right:9%;
+    display:flex;align-items:center;justify-content:space-evenly;}
   .shield .stat-baris div{text-align:center;}
-  .shield .stat-baris b{display:block;font-size:15px;font-weight:900;color:#241a04;line-height:1;}
-  .shield .stat-baris span{display:block;font-size:8.5px;font-weight:800;color:rgba(36,26,4,.7);
-    text-transform:uppercase;letter-spacing:.4px;margin-top:2px;}
-  .shield .stat-baris.baris-4{gap:8px;}
-  .shield .stat-baris.baris-4 b{font-size:13px;}
-  .shield .stat-baris.baris-4 span{font-size:7.5px;letter-spacing:.2px;}
+  .shield .stat-baris b{display:block;font-size:14px;font-weight:900;color:var(--tinta);line-height:1;}
+  .shield .stat-baris span{display:block;font-size:7.5px;font-weight:800;color:var(--tinta);opacity:.72;
+    text-transform:uppercase;letter-spacing:.3px;margin-top:3px;}
 
-  .shield .footer-shield{position:relative;z-index:1;display:flex;align-items:center;
-    justify-content:center;gap:8px;padding-bottom:14px;}
+  .shield .footer-shield{position:absolute;z-index:2;top:84%;left:0;right:0;display:flex;align-items:center;
+    justify-content:center;gap:8px;}
   .shield .footer-shield svg{height:15px;width:auto;border-radius:2px;
     box-shadow:0 1px 3px rgba(0,0,0,.3);}
   .shield .footer-shield .logo-badge{height:20px;width:20px;border-radius:50%;
@@ -456,6 +449,16 @@
     .sorot{column-gap:8px;}
     .sorot-foto{max-width:82px;height:125px;}
     .sorot-angka{font-size:32px;}
+  }
+  /* HP: dua kartu pemain per baris */
+  @media (max-width:520px){
+    .grid-skuad{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 10px;}
+    .shield-wrap{width:100%;max-width:178px;}
+    .shield .rating-pos b{font-size:26px;}
+    .shield .rating-pos span{font-size:12px;}
+    .shield .nama-pemain{font-size:11.5px;}
+    .shield .stat-baris b{font-size:13px;}
+    .shield .stat-baris span{font-size:7px;}
   }
   @media (max-width:640px){
     .hero-strip{height:100px;}
@@ -990,7 +993,9 @@ function render(){
             <b>${Math.round(p.rating*10)}</b>
             <span>${p.pos}</span>
           </div>
-          ${fotoPemain(p.nama) ? `<img class="foto-pemain" src="${fotoPemain(p.nama)}" alt="${escapeHtml(p.nama)}">` : ''}
+          ${fotoPemain(p.nama)
+            ? `<img class="foto-pemain" src="${fotoPemain(p.nama)}" alt="${escapeHtml(p.nama)}">`
+            : `<img class="foto-pemain foto-kosong" src="/ikon/logo.png" alt="">`}
           <div class="nama-pemain">${escapeHtml(p.nama)}</div>
           <hr class="garis-shield">
           ${p.gk ? `
