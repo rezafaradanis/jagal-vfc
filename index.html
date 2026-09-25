@@ -72,7 +72,7 @@
     background:var(--merah);}
 
   /* Section ringkasan editorial — highlight besar di atas halaman Skuad */
-  .grid-sorot{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:14px;margin-bottom:32px;}
+  .grid-sorot{display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:14px;margin-bottom:32px;}
   .sorot{position:relative;border-radius:16px;padding:22px;overflow:hidden;
     border:1px solid var(--garis-lembut);box-shadow:0 8px 24px rgba(0,0,0,.3);
     background:linear-gradient(160deg, rgba(224,38,60,.10), rgba(19,19,24,.4)), var(--bg2);}
@@ -82,8 +82,24 @@
   .sorot .nilai{font-size:34px;font-weight:900;letter-spacing:-.5px;line-height:1.1;margin-bottom:4px;}
   .sorot.utama .nilai{font-size:30px;}
   .sorot .ket{font-size:12.5px;color:var(--redup);}
-  .sorot .angka-besar{position:absolute;right:10px;bottom:-14px;font-size:88px;font-weight:900;
-    color:rgba(255,255,255,.03);line-height:1;pointer-events:none;}
+  /* Isi kartu: teks di kiri, angka di tengah, foto (kalau ada) di kanan */
+  /* Kiri: label + nama (atas) dan keterangan (bawah) · tengah: angka · kanan: foto setinggi kartu */
+  .sorot{display:grid;grid-template-columns:minmax(0,1fr) auto auto;
+    grid-template-areas:"kepala kepala foto" "ket angka foto";column-gap:10px;row-gap:6px;
+    align-items:end;min-height:160px;}
+  .sorot-kepala{grid-area:kepala;align-self:start;min-width:0;}
+  .sorot-ket{grid-area:ket;min-width:0;}
+  .sorot .nilai{font-size:22px;overflow-wrap:anywhere;}
+  .sorot.utama .nilai{font-size:22px;}
+  .sorot-angka{grid-area:angka;font-size:38px;font-weight:900;line-height:1;color:var(--merah);
+    letter-spacing:-1px;text-align:center;}
+  .sorot-angka small{display:block;font-size:9px;font-weight:800;letter-spacing:1.2px;
+    text-transform:uppercase;color:var(--redup);margin-top:4px;}
+  .sorot-foto{grid-area:foto;align-self:end;height:150px;width:auto;max-width:100px;
+    object-fit:contain;object-position:bottom;margin:-8px -10px -22px 0;
+    filter:drop-shadow(0 6px 14px rgba(0,0,0,.5));}
+  /* Tidak pernah dipotong: kalau tidak muat, turun ke baris berikutnya. */
+  .sorot-ket .ket{font-size:12px;line-height:1.45;overflow-wrap:anywhere;}
 
   .form-strip{display:flex;gap:6px;}
   .form-titik{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;
@@ -425,14 +441,28 @@
   .modal-stat b{display:block;font-size:20px;font-weight:900;}
   .modal-stat span{font-size:10.5px;color:var(--redup);text-transform:uppercase;letter-spacing:.4px;}
 
-  @media (max-width:820px){
+  /* Di bawah 1100px kartu sorotan ditumpuk supaya tiap kartu tetap lega. */
+  @media (max-width:1100px){
     .grid-sorot{grid-template-columns:1fr;}
+  }
+  /* Tablet: kartu melebar, jadi angka diletakkan di tengah kartu supaya seimbang. */
+  @media (min-width:641px) and (max-width:1100px){
+    /* grid-area:auto supaya patokan posisinya seluruh kartu, bukan sel grid-nya */
+    .sorot-angka{grid-area:auto;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:48px;}
+    .sorot-foto{max-width:120px;height:160px;}
+  }
+  /* HP kecil: foto dan angka sedikit diperkecil supaya daftar tiga besar muat satu baris. */
+  @media (max-width:420px){
+    .sorot{column-gap:8px;}
+    .sorot-foto{max-width:82px;height:125px;}
+    .sorot-angka{font-size:32px;}
   }
   @media (max-width:640px){
     .hero-strip{height:100px;}
     .mitra-hero{height:170px;}
     .judul-hal{font-size:30px;}
-    .sorot .angka-besar{display:none;}
+    .sorot-angka{font-size:40px;}
+    .sorot-foto{height:140px;}
   }
 </style>
 </head>
@@ -484,37 +514,37 @@ const CONFIG = {
    2. DATA CADANGAN (dipakai kalau EA tidak terjangkau)
    Snapshot diambil 24 September 2026 (malam WIB).
    ══════════════════════════════════════════════════════════ */
-const SNAPSHOT_TANGGAL = '24 September 2026, 23:31 WIB';
+const SNAPSHOT_TANGGAL = '25 September 2026, 08:20 WIB';
 const POS_MAP = { goalkeeper:'GK', defender:'CB', midfielder:'CM', forward:'ST' };
 
 const SQUAD_MANUAL = [
-  {nama:"KeenArok",pos:"CM",main:38,gol:5,assist:4,rating:6.6,peran:"midfielder",motmMusim:0},
-  {nama:"GEE-ZONEPLAY",pos:"CM",main:37,gol:0,assist:5,rating:7.5,peran:"midfielder",motmMusim:4},
-  {nama:"laTern7",pos:"ST",main:35,gol:3,assist:2,rating:5.6,peran:"forward",motmMusim:1},
-  {nama:"youngcrowheart",pos:"ST",main:31,gol:10,assist:5,rating:6.5,peran:"forward",motmMusim:0},
-  {nama:"N0oootz",pos:"CM",main:30,gol:0,assist:6,rating:6.6,peran:"midfielder",motmMusim:0},
-  {nama:"driftking696911",pos:"ST",main:27,gol:20,assist:3,rating:6.3,peran:"forward",motmMusim:3},
-  {nama:"Kngsmn21",pos:"CM",main:20,gol:8,assist:16,rating:6.6,peran:"midfielder",motmMusim:2},
-  {nama:"Doubleh5435",pos:"ST",main:18,gol:3,assist:4,rating:5.1,peran:"forward",motmMusim:0},
-  {nama:"donnyalexandro13",pos:"ST",main:12,gol:1,assist:2,rating:6.6,peran:"forward",motmMusim:0},
-  {nama:"LeoAwinz",pos:"CM",main:11,gol:4,assist:2,rating:6.6,peran:"midfielder",motmMusim:1},
-  {nama:"UcupCampina",pos:"CB",main:10,gol:1,assist:0,rating:6.5,peran:"defender",motmMusim:0},
-  {nama:"Derozan_Zyandaru",pos:"ST",main:8,gol:1,assist:2,rating:5.0,peran:"forward",motmMusim:0},
-  {nama:"faisalabdr10",pos:"CM",main:7,gol:1,assist:0,rating:7.5,peran:"midfielder",motmMusim:0},
-  {nama:"Tox1cSnail",pos:"ST",main:6,gol:4,assist:4,rating:7.7,peran:"forward",motmMusim:1},
-  {nama:"rivaldstn",pos:"ST",main:6,gol:3,assist:2,rating:6.2,peran:"forward",motmMusim:1},
-  {nama:"andhikaabas",pos:"CB",main:5,gol:0,assist:0,rating:6.7,peran:"defender",motmMusim:0},
-  {nama:"Vynex26",pos:"CB",main:5,gol:0,assist:0,rating:4.6,peran:"defender",motmMusim:0},
-  {nama:"cevepe91",pos:"ST",main:4,gol:0,assist:0,rating:6.1,peran:"forward",motmMusim:0},
-  {nama:"rainKingz",pos:"GK",main:4,gol:0,assist:0,rating:5.2,peran:"goalkeeper",motmMusim:0,gkCleanSheet:1},
-  {nama:"Harymeng",pos:"CM",main:4,gol:0,assist:0,rating:7.2,peran:"midfielder",motmMusim:0},
-  {nama:"Dlyvaganza",pos:"ST",main:3,gol:2,assist:0,rating:6.9,peran:"forward",motmMusim:0},
-  {nama:"DuhSiLerrr",pos:"CM",main:2,gol:0,assist:0,rating:7.4,peran:"midfielder",motmMusim:0},
-  {nama:"P41n_Counter",pos:"CM",main:2,gol:0,assist:0,rating:4.8,peran:"midfielder",motmMusim:0},
+  {nama:"KeenArok",pos:"CM",main:38,gol:5,assist:4,rating:6.6,peran:"midfielder",motmMusim:0,gkCleanSheet:0,cleanSheetBek:0,winRate:39,passing:504,passAkurasi:81,tekel:35,tekelAkurasi:25,tembakanAkurasi:38,kartuMerah:0},
+  {nama:"GEE-ZONEPLAY",pos:"CM",main:37,gol:0,assist:5,rating:7.5,peran:"midfielder",motmMusim:4,gkCleanSheet:0,cleanSheetBek:0,winRate:43,passing:515,passAkurasi:84,tekel:66,tekelAkurasi:52,tembakanAkurasi:0,kartuMerah:0},
+  {nama:"laTern7",pos:"ST",main:35,gol:3,assist:2,rating:5.6,peran:"forward",motmMusim:1,gkCleanSheet:1,cleanSheetBek:0,winRate:37,passing:189,passAkurasi:82,tekel:12,tekelAkurasi:36,tembakanAkurasi:30,kartuMerah:0},
+  {nama:"youngcrowheart",pos:"ST",main:31,gol:10,assist:5,rating:6.5,peran:"forward",motmMusim:0,gkCleanSheet:1,cleanSheetBek:0,winRate:25,passing:308,passAkurasi:79,tekel:14,tekelAkurasi:22,tembakanAkurasi:45,kartuMerah:0},
+  {nama:"N0oootz",pos:"CM",main:30,gol:0,assist:6,rating:6.6,peran:"midfielder",motmMusim:0,gkCleanSheet:0,cleanSheetBek:0,winRate:26,passing:254,passAkurasi:76,tekel:16,tekelAkurasi:34,tembakanAkurasi:0,kartuMerah:0},
+  {nama:"driftking696911",pos:"ST",main:27,gol:20,assist:3,rating:6.3,peran:"forward",motmMusim:3,gkCleanSheet:0,cleanSheetBek:0,winRate:37,passing:257,passAkurasi:82,tekel:8,tekelAkurasi:24,tembakanAkurasi:52,kartuMerah:0},
+  {nama:"Kngsmn21",pos:"CM",main:20,gol:8,assist:16,rating:6.6,peran:"midfielder",motmMusim:2,gkCleanSheet:1,cleanSheetBek:0,winRate:40,passing:221,passAkurasi:77,tekel:17,tekelAkurasi:73,tembakanAkurasi:36,kartuMerah:0},
+  {nama:"Doubleh5435",pos:"ST",main:18,gol:3,assist:4,rating:5.1,peran:"forward",motmMusim:0,gkCleanSheet:0,cleanSheetBek:0,winRate:38,passing:108,passAkurasi:73,tekel:9,tekelAkurasi:47,tembakanAkurasi:17,kartuMerah:0},
+  {nama:"donnyalexandro13",pos:"ST",main:12,gol:1,assist:2,rating:6.6,peran:"forward",motmMusim:0,gkCleanSheet:0,cleanSheetBek:0,winRate:25,passing:126,passAkurasi:73,tekel:11,tekelAkurasi:20,tembakanAkurasi:7,kartuMerah:0},
+  {nama:"LeoAwinz",pos:"CM",main:11,gol:4,assist:2,rating:6.6,peran:"midfielder",motmMusim:1,gkCleanSheet:0,cleanSheetBek:0,winRate:45,passing:226,passAkurasi:81,tekel:14,tekelAkurasi:40,tembakanAkurasi:80,kartuMerah:0},
+  {nama:"UcupCampina",pos:"CB",main:10,gol:1,assist:0,rating:6.5,peran:"defender",motmMusim:0,gkCleanSheet:0,cleanSheetBek:1,winRate:40,passing:97,passAkurasi:87,tekel:6,tekelAkurasi:31,tembakanAkurasi:50,kartuMerah:0},
+  {nama:"Derozan_Zyandaru",pos:"ST",main:8,gol:1,assist:2,rating:5.0,peran:"forward",motmMusim:0,gkCleanSheet:0,cleanSheetBek:0,winRate:37,passing:31,passAkurasi:75,tekel:5,tekelAkurasi:50,tembakanAkurasi:10,kartuMerah:0},
+  {nama:"faisalabdr10",pos:"CM",main:7,gol:1,assist:0,rating:7.5,peran:"midfielder",motmMusim:0,gkCleanSheet:0,cleanSheetBek:0,winRate:28,passing:77,passAkurasi:85,tekel:14,tekelAkurasi:45,tembakanAkurasi:25,kartuMerah:0},
+  {nama:"Tox1cSnail",pos:"ST",main:6,gol:4,assist:4,rating:7.7,peran:"forward",motmMusim:1,gkCleanSheet:0,cleanSheetBek:0,winRate:50,passing:89,passAkurasi:87,tekel:8,tekelAkurasi:72,tembakanAkurasi:40,kartuMerah:0},
+  {nama:"rivaldstn",pos:"ST",main:6,gol:3,assist:2,rating:6.2,peran:"forward",motmMusim:1,gkCleanSheet:0,cleanSheetBek:0,winRate:50,passing:85,passAkurasi:83,tekel:5,tekelAkurasi:21,tembakanAkurasi:37,kartuMerah:0},
+  {nama:"andhikaabas",pos:"CB",main:5,gol:0,assist:0,rating:6.7,peran:"defender",motmMusim:0,gkCleanSheet:0,cleanSheetBek:1,winRate:20,passing:55,passAkurasi:76,tekel:2,tekelAkurasi:8,tembakanAkurasi:0,kartuMerah:0},
+  {nama:"Vynex26",pos:"CB",main:5,gol:0,assist:0,rating:4.6,peran:"defender",motmMusim:0,gkCleanSheet:0,cleanSheetBek:1,winRate:20,passing:14,passAkurasi:73,tekel:3,tekelAkurasi:25,tembakanAkurasi:0,kartuMerah:0},
+  {nama:"cevepe91",pos:"ST",main:4,gol:0,assist:0,rating:6.1,peran:"forward",motmMusim:0,gkCleanSheet:1,cleanSheetBek:0,winRate:50,passing:46,passAkurasi:82,tekel:1,tekelAkurasi:16,tembakanAkurasi:0,kartuMerah:0},
+  {nama:"rainKingz",pos:"GK",main:4,gol:0,assist:0,rating:5.2,peran:"goalkeeper",motmMusim:0,gkCleanSheet:1,cleanSheetBek:0,winRate:25,passing:9,passAkurasi:81,tekel:0,tekelAkurasi:0,tembakanAkurasi:0,kartuMerah:0},
+  {nama:"Harymeng",pos:"CM",main:4,gol:0,assist:0,rating:7.2,peran:"midfielder",motmMusim:0,gkCleanSheet:0,cleanSheetBek:0,winRate:25,passing:71,passAkurasi:78,tekel:2,tekelAkurasi:50,tembakanAkurasi:0,kartuMerah:0},
+  {nama:"Dlyvaganza",pos:"ST",main:3,gol:2,assist:0,rating:6.9,peran:"forward",motmMusim:0,gkCleanSheet:0,cleanSheetBek:0,winRate:66,passing:27,passAkurasi:72,tekel:1,tekelAkurasi:5,tembakanAkurasi:66,kartuMerah:0},
+  {nama:"DuhSiLerrr",pos:"CM",main:2,gol:0,assist:0,rating:7.4,peran:"midfielder",motmMusim:0,gkCleanSheet:0,cleanSheetBek:0,winRate:0,passing:36,passAkurasi:81,tekel:2,tekelAkurasi:33,tembakanAkurasi:0,kartuMerah:0},
+  {nama:"P41n_Counter",pos:"CM",main:2,gol:0,assist:0,rating:4.8,peran:"midfielder",motmMusim:0,gkCleanSheet:0,cleanSheetBek:0,winRate:0,passing:5,passAkurasi:41,tekel:1,tekelAkurasi:33,tembakanAkurasi:0,kartuMerah:0},
 ].sort((a,b)=>b.main-a.main).map((p,i)=>({...p, no:i+1, gk:p.pos==='GK'}));
 
 const TOTALS_MANUAL = { main:54, menang:20, seri:10, kalah:24, gol:103, kemasukan:132, skill:1497 };
-const DIVISI_MANUAL = { sekarang:4, terbaik:4, promosi:3, degradasi:1, poin:44, cleanSheet:4, playoff:0 };
+const DIVISI_MANUAL = { sekarang:4, terbaik:4, promosi:4, degradasi:2, poin:44, cleanSheet:7, playoff:0 };
 
 const HASIL_MANUAL = [
   { tgl:'2026-09-24', lawan:'NOCTURNE (Friendly)', skor:'3 – 0', hasil:'win'  },
@@ -553,6 +583,11 @@ async function eaGet(path){
   return r.json();
 }
 
+// Kosong/tidak ada → null (supaya kolomnya bisa disembunyikan), selain itu angka.
+function angkaAtauNull(v){
+  return (v === undefined || v === null || v === '') ? null : +v;
+}
+
 async function tarikDataEA(){
   const { id, platform, nama } = CONFIG.club;
   if(!id) return null;
@@ -574,18 +609,18 @@ async function tarikDataEA(){
       rating: Math.round((+m.ratingAve || 0)*10)/10,
       peran: m.favoritePosition || 'Anggota',
       gk,
-      // Statistik khusus kiper — dari EA members/stats
-      gkMenang: +m.wins || 0,
-      gkKalah: +m.losses || 0,
+      // Nama field di bawah sudah dicocokkan dengan data asli EA members/stats
+      // (dicek 25 Sep 2026). EA TIDAK menyediakan kartu kuning, save, kemasukan,
+      // atau menang/kalah per pemain — jadi sengaja tidak diambil.
       gkCleanSheet: +m.cleanSheetsGK || 0,
-      gkKemasukan: +m.goalsAgainst || 0,
-      gkSave: +m.savesMade || 0,
-      gkTembakanDihadapi: +m.shotsAgainst || 0,
-      // Disiplin
-      kartuKuning: +m.cardsYellow || 0,
-      kartuMerah: +m.cardsRed || 0,
-      // Statistik lanjutan
-      passAkurasi: +m.passesMade > 0 ? Math.round((+m.passesMade / (+m.passAttempts || m.passesMade)) * 100) : (+m.passSuccessRate ? Math.round(+m.passSuccessRate) : null),
+      cleanSheetBek: angkaAtauNull(m.cleanSheetsDef),
+      winRate: angkaAtauNull(m.winRate),
+      passing: angkaAtauNull(m.passesMade),
+      passAkurasi: angkaAtauNull(m.passSuccessRate),
+      tekel: angkaAtauNull(m.tacklesMade),
+      tekelAkurasi: angkaAtauNull(m.tackleSuccessRate),
+      tembakanAkurasi: angkaAtauNull(m.shotSuccessRate),
+      kartuMerah: angkaAtauNull(m.redCards),
       motmMusim: +m.manOfTheMatch || 0,
     };
   }).filter(m=>m.main > 0).sort((a,b)=>b.main-a.main).map((m,i)=>({...m, no:i+1}));
@@ -619,16 +654,20 @@ async function tarikDataEA(){
 
         // Box score per pemain — dari clubs/matches, field "players" per klub.
         const pemainRaw = mm.players?.[id] || null;
+        // Nama field sudah dicocokkan dengan data asli EA (dicek 25 Sep 2026).
+        // EA tidak menyediakan kartu kuning per laga.
         const detail = pemainRaw ? Object.values(pemainRaw).map(pl=>({
           nama: pl.playername || 'Pemain',
           gol: +pl.goals || 0,
           assist: +pl.assists || 0,
-          tekel: +pl.tacklesmade || 0,
+          tembakan: +pl.shots || 0,
           passSukses: +pl.passesmade || 0,
+          passCoba: +pl.passattempts || 0,
+          tekel: +pl.tacklesmade || 0,
+          save: +pl.saves || 0,
+          kartuMerah: +pl.redcards || 0,
           rating: Math.round((+pl.rating || 0)*10)/10,
           mom: pl.mom === '1' || pl.mom === 1,
-          kartuKuning: +pl.cardsYellow || 0,
-          kartuMerah: +pl.cardsRed || 0,
         })).sort((x,y)=>y.rating-x.rating) : null;
 
         hasil.push({
@@ -657,16 +696,33 @@ function hitungRingkasan(squad, hasil, totals){
   const outfield = squad.filter(p=>!p.gk);
   const topGol = [...outfield].sort((a,b)=>b.gol-a.gol)[0] || null;
   const topAssist = [...outfield].sort((a,b)=>b.assist-a.assist)[0] || null;
-  const topRating = [...squad].filter(p=>p.main>=3).sort((a,b)=>b.rating-a.rating)[0] || squad[0] || null;
 
-  // Player of the Season: rasio MOTM per laga (min. 3 laga main supaya tidak
-  // bias ke pemain yang baru main 1-2 kali tapi kebetulan MOTM sekali).
-  const kandidatPOTS = squad.filter(p=>p.main>=3 && (p.motmMusim||0)>0);
-  const playerOfSeason = [...kandidatPOTS].sort((a,b)=>{
-    const ra = (a.motmMusim||0)/a.main, rb = (b.motmMusim||0)/b.main;
-    if(rb !== ra) return rb-ra;
-    return (b.motmMusim||0) - (a.motmMusim||0);
-  })[0] || null;
+  // Player of the Season — skor gabungan:
+  //   50% rating rata-rata + 30% MOTM per laga + 20% (gol+assist) per laga.
+  // Tiap komponen dibagi nilai tertinggi di antara kandidat, lalu skor x100.
+  // Syarat: main minimal 1/3 dari total laga klub (min. 3), supaya pemain yang
+  // baru main sedikit laga tidak menang hanya karena satu laga bagus.
+  const minLagaPOTS = Math.max(3, Math.round((totals?.main || 0) / 3));
+  let kandidatPOTS = squad.filter(p=>p.main >= minLagaPOTS);
+  if(!kandidatPOTS.length) kandidatPOTS = squad.filter(p=>p.main >= 3);
+  const perLaga = p => ({
+    rating: p.rating || 0,
+    motm: (p.motmMusim || 0) / p.main,
+    kontribusi: ((p.gol || 0) + (p.assist || 0)) / p.main,
+  });
+  const maks = { rating:0, motm:0, kontribusi:0 };
+  kandidatPOTS.forEach(p=>{ const v = perLaga(p); for(const k in maks) maks[k] = Math.max(maks[k], v[k]); });
+  const bagi = (v, m) => m > 0 ? v / m : 0;
+  const skorPOTS = p => {
+    const v = perLaga(p);
+    return Math.round(100 * (0.5*bagi(v.rating, maks.rating) + 0.3*bagi(v.motm, maks.motm) + 0.2*bagi(v.kontribusi, maks.kontribusi)));
+  };
+  const peringkatPOTS = kandidatPOTS.map(p=>({ ...p, skorPOTS: skorPOTS(p) }))
+    .sort((a,b)=> b.skorPOTS - a.skorPOTS || b.rating - a.rating);
+  const playerOfSeason = peringkatPOTS[0] || null;
+  // Rating tertinggi memakai syarat laga minimum yang sama dengan POTS.
+  const topRating = [...kandidatPOTS].sort((a,b)=>b.rating-a.rating)[0] || squad[0] || null;
+  const top3POTS = peringkatPOTS.slice(0, 3);
 
   const distribusi = { GK:0, CB:0, CM:0, ST:0 };
   squad.forEach(p=>{ if(distribusi[p.pos]!=null) distribusi[p.pos]++; });
@@ -677,7 +733,7 @@ function hitungRingkasan(squad, hasil, totals){
   const rataGol = t.main ? Math.round((t.gol / t.main)*10)/10 : null;
   const rataKemasukan = t.main ? Math.round((t.kemasukan / t.main)*10)/10 : null;
 
-  return { topGol, topAssist, topRating, playerOfSeason, distribusi, form, rataGol, rataKemasukan };
+  return { topGol, topAssist, topRating, playerOfSeason, top3POTS, minLagaPOTS, distribusi, form, rataGol, rataKemasukan };
 }
 
 function stripForm(form){
@@ -784,8 +840,25 @@ function nilaiStatistik(p, kolom){
     case 'assist': return p.assist||0;
     case 'motmMusim': return p.motmMusim||0;
     case 'rating': return p.rating||0;
-    default: return 0;
+    default: return p[kolom] ?? -1; // kolom opsional (winRate, passAkurasi, dst.)
   }
+}
+
+// Kolom opsional tabel statistik: hanya ditampilkan kalau minimal satu pemain
+// punya datanya (data cadangan lama atau EA bisa saja tidak menyediakan).
+const KOLOM_OPSIONAL = [
+  { key:'winRate',         label:'Win %',      persen:true },
+  { key:'passAkurasi',     label:'Pass %',     persen:true },
+  { key:'tekelAkurasi',    label:'Tekel %',    persen:true },
+  { key:'tembakanAkurasi', label:'Tembakan %', persen:true },
+  { key:'kartuMerah',      label:'🟥',         persen:false },
+];
+function kolomAdaData(daftar, key){
+  return daftar.some(p => p[key] !== undefined && p[key] !== null);
+}
+function formatNilai(v, persen){
+  if(v === undefined || v === null) return '–';
+  return persen ? v + '%' : v;
 }
 
 function nilaiSkuad(p, kolom){
@@ -794,7 +867,7 @@ function nilaiSkuad(p, kolom){
     case 'pos': return POS_URUT[p.pos] ?? 9;
     case 'main': return p.main||0;
     case 'gol': return p.gk ? (p.gkCleanSheet||0) : (p.gol||0);
-    case 'assist': return p.gk ? (p.gkSave||0) : (p.assist||0);
+    case 'assist': return p.assist||0;
     case 'motmMusim': return p.motmMusim||0;
     default: return 0;
   }
@@ -854,24 +927,38 @@ function render(){
 
     if(DATA.squad.length){
       const r = hitungRingkasan(DATA.squad, DATA.hasil, DATA.totals);
+      // Angka di tengah, foto di kanan (hanya kalau fotonya tersedia).
+      const fotoSorot = p => {
+        const src = p ? fotoPemain(p.nama) : null;
+        return src ? `<img class="sorot-foto" src="${src.startsWith('/') ? src : '/' + src}" alt="${escapeHtml(p.nama)}">` : '';
+      };
+      const angkaSorot = (nilai, satuan) => nilai == null ? '' : `<div class="sorot-angka">${nilai}<small>${satuan}</small></div>`;
       isi += `<div class="grid-sorot">
         <div class="sorot utama">
-          <div class="label">⚽ Top Scorer</div>
-          ${r.topGol ? `<div class="nilai">${escapeHtml(r.topGol.nama)}</div>
-          <div class="ket">${r.topGol.gol} gol dari ${r.topGol.main} laga</div>` : `<div class="ket">Belum ada data.</div>`}
-          <span class="angka-besar">${r.topGol?.gol ?? ''}</span>
+          <div class="sorot-kepala">
+            <div class="label">⚽ Top Scorer</div>
+            ${r.topGol ? `<div class="nilai">${escapeHtml(r.topGol.nama)}</div>` : ''}
+          </div>
+          <div class="sorot-ket">${r.topGol ? `<div class="ket">dari ${r.topGol.main} laga</div>` : `<div class="ket">Belum ada data.</div>`}</div>
+          ${r.topGol ? angkaSorot(r.topGol.gol, 'gol') + fotoSorot(r.topGol) : ''}
         </div>
         <div class="sorot">
-          <div class="label">🎯 Top Assist</div>
-          ${r.topAssist ? `<div class="nilai">${escapeHtml(r.topAssist.nama)}</div>
-          <div class="ket">${r.topAssist.assist} assist</div>` : `<div class="ket">Belum ada data.</div>`}
-          <span class="angka-besar">${r.topAssist?.assist ?? ''}</span>
+          <div class="sorot-kepala">
+            <div class="label">🎯 Top Assist</div>
+            ${r.topAssist ? `<div class="nilai">${escapeHtml(r.topAssist.nama)}</div>` : ''}
+          </div>
+          <div class="sorot-ket">${r.topAssist ? `<div class="ket">dari ${r.topAssist.main} laga</div>` : `<div class="ket">Belum ada data.</div>`}</div>
+          ${r.topAssist ? angkaSorot(r.topAssist.assist, 'assist') + fotoSorot(r.topAssist) : ''}
         </div>
         <div class="sorot">
-          <div class="label">🏆 Player of the Season</div>
-          ${r.playerOfSeason ? `<div class="nilai">${escapeHtml(r.playerOfSeason.nama)}</div>
-          <div class="ket">${r.playerOfSeason.motmMusim} MOTM dari ${r.playerOfSeason.main} laga (${((r.playerOfSeason.motmMusim/r.playerOfSeason.main)*100).toFixed(0)}%)</div>` : `<div class="ket">Belum ada data MOTM.</div>`}
-          <div class="ket" style="margin-top:10px;">Rating tertinggi: ${r.topRating ? escapeHtml(r.topRating.nama)+' ('+r.topRating.rating.toFixed(1)+')' : '–'}</div>
+          <div class="sorot-kepala">
+            <div class="label">🏆 Player of the Season</div>
+            ${r.playerOfSeason ? `<div class="nilai">${escapeHtml(r.playerOfSeason.nama)}</div>` : ''}
+          </div>
+          <div class="sorot-ket">${r.playerOfSeason
+            ? r.top3POTS.map((p, i)=>`<div class="ket">${['🥇','🥈','🥉'][i]} <b style="color:var(--teks);">${p.skorPOTS}</b> ${escapeHtml(p.nama)}</div>`).join('')
+            : `<div class="ket">Belum ada pemain yang memenuhi syarat.</div>`}</div>
+          ${r.playerOfSeason ? angkaSorot(r.playerOfSeason.skorPOTS, 'skor') + fotoSorot(r.playerOfSeason) : ''}
         </div>
       </div>`;
     }
@@ -884,7 +971,7 @@ function render(){
           <option value="pos">Posisi</option>
           <option value="main">Main</option>
           <option value="gol">Gol (Kiper: Clean Sheet)</option>
-          <option value="assist">Assist (Kiper: Save)</option>
+          <option value="assist">Assist</option>
           <option value="motmMusim">MOTM</option>
         </select>
         <button type="button" class="btn-arah-sortir" id="sortirSkuadArah">
@@ -910,7 +997,7 @@ function render(){
           <div class="stat-baris baris-4">
             <div><b>${p.main}</b><span>Main</span></div>
             <div><b>${p.gkCleanSheet??0}</b><span>CS</span></div>
-            <div><b>${p.gkSave??0}</b><span>Save</span></div>
+            <div><b>${formatNilai(p.winRate, true)}</b><span>Win</span></div>
             <div><b>${p.motmMusim??0}</b><span>MOTM</span></div>
           </div>` : `
           <div class="stat-baris baris-4">
@@ -957,31 +1044,41 @@ function render(){
       { key:'gol',         label:'Gol',    sortir:true },
       { key:'assist',      label:'Assist', sortir:true },
       { key:'motmMusim',   label:'MOTM',   sortir:true },
+      ...KOLOM_OPSIONAL.filter(k=>kolomAdaData(pemainOutfield, k.key)).map(k=>({ ...k, sortir:true })),
       { key:'rating',      label:'Rating', sortir:true },
     ];
+    const selStatistik = (p, k) => {
+      switch(k.key){
+        case 'nama': return escapeHtml(p.nama);
+        case 'rating': return p.rating.toFixed(1);
+        case 'motmMusim': return p.motmMusim ?? 0;
+        default: return k.persen !== undefined ? formatNilai(p[k.key], k.persen) : (p[k.key] ?? '–');
+      }
+    };
     isi += `<div class="tbl-wrap"><table><thead><tr>` + kolomTabel.map(k=>{
       if(!k.sortir) return `<th>${k.label}</th>`;
       const aktif = SORTIR_STATISTIK.kolom === k.key;
       const panah = aktif ? (SORTIR_STATISTIK.arah === 'desc' ? '▼' : '▲') : '↕';
       return `<th class="sortir${aktif?' aktif':''}" data-kolom="${k.key}">${k.label} <span class="panah-sortir">${panah}</span></th>`;
-    }).join('') + `</tr></thead><tbody>` + pemainOutfield.map(p=>`
-      <tr><td>${p.no}</td><td>${escapeHtml(p.nama)}</td><td>${p.pos}</td>
-      <td>${p.main}</td><td>${p.gol}</td><td>${p.assist}</td>
-      <td>${p.motmMusim??0}</td>
-      <td>${p.rating.toFixed(1)}</td></tr>`
+    }).join('') + `</tr></thead><tbody>` + pemainOutfield.map(p=>
+      `<tr>${kolomTabel.map(k=>`<td>${selStatistik(p, k)}</td>`).join('')}</tr>`
     ).join('') + `</tbody></table></div>`;
 
     if(kiper.length){
+      // Hanya data kiper yang memang disediakan EA per pemain.
+      const kolomKiper = [
+        { key:'no', label:'#' }, { key:'nama', label:'Pemain' }, { key:'main', label:'Main' },
+        { key:'gkCleanSheet', label:'Clean Sheet' },
+        ...[{ key:'winRate', label:'Win %', persen:true }, { key:'passAkurasi', label:'Pass %', persen:true }]
+          .filter(k=>kolomAdaData(kiper, k.key)),
+        { key:'motmMusim', label:'MOTM' }, { key:'rating', label:'Rating' },
+      ];
       isi += `<h2 class="subjudul">Statistik Kiper</h2>`;
-      isi += `<div class="tbl-wrap"><table><thead><tr>
-        <th>#</th><th>Pemain</th><th>Main</th><th>Menang</th><th>Kalah</th>
-        <th>Clean Sheet</th><th>Save</th><th>Tembakan Dihadapi</th><th>Kemasukan</th><th>Rating</th>
-        </tr></thead><tbody>` + kiper.map(p=>`
-        <tr><td>${p.no}</td><td>${escapeHtml(p.nama)}</td><td>${p.main}</td>
-        <td>${p.gkMenang??0}</td><td>${p.gkKalah??0}</td><td>${p.gkCleanSheet??0}</td>
-        <td>${p.gkSave??0}</td><td>${p.gkTembakanDihadapi??0}</td><td>${p.gkKemasukan??0}</td>
-        <td>${p.rating.toFixed(1)}</td></tr>`
-      ).join('') + `</tbody></table></div>`;
+      isi += `<div class="tbl-wrap"><table><thead><tr>` +
+        kolomKiper.map(k=>`<th>${k.label}</th>`).join('') +
+        `</tr></thead><tbody>` + kiper.map(p=>
+          `<tr>${kolomKiper.map(k=>`<td>${selStatistik(p, k)}</td>`).join('')}</tr>`
+        ).join('') + `</tbody></table></div>`;
     }
 
     if(DATA.hasil.length){
@@ -1238,12 +1335,18 @@ function render(){
         }
         if(!kotak.dataset.terisi){
           const m = DATA.hasil[i];
+          // Kolom Save & kartu merah hanya muncul kalau ada yang bukan nol di laga itu.
+          const adaSave = m.detail.some(pl=>pl.save > 0);
+          const adaMerah = m.detail.some(pl=>pl.kartuMerah > 0);
           kotak.innerHTML = `<div class="tbl-wrap" style="border:none;box-shadow:none;"><table><thead><tr>
-            <th>Pemain</th><th>Gol</th><th>Assist</th><th>Tekel</th><th>🟨</th><th>🟥</th><th>Rating</th>
+            <th>Pemain</th><th>Gol</th><th>Assist</th><th>Tembakan</th><th>Passing</th><th>Tekel</th>
+            ${adaSave ? '<th>Save</th>' : ''}${adaMerah ? '<th>🟥</th>' : ''}<th>Rating</th>
             </tr></thead><tbody>` + m.detail.map(pl=>`
             <tr><td>${escapeHtml(pl.nama)}${pl.mom ? ' <span class="mom">★ MOTM</span>' : ''}</td>
-            <td>${pl.gol}</td><td>${pl.assist}</td><td>${pl.tekel}</td>
-            <td>${pl.kartuKuning??0}</td><td>${pl.kartuMerah??0}</td>
+            <td>${pl.gol}</td><td>${pl.assist}</td><td>${pl.tembakan ?? 0}</td>
+            <td>${pl.passCoba ? `${pl.passSukses}/${pl.passCoba}` : (pl.passSukses ?? 0)}</td>
+            <td>${pl.tekel}</td>
+            ${adaSave ? `<td>${pl.save}</td>` : ''}${adaMerah ? `<td>${pl.kartuMerah}</td>` : ''}
             <td>${pl.rating.toFixed(1)}</td></tr>`
           ).join('') + `</tbody></table></div>`;
           kotak.dataset.terisi = '1';
@@ -1352,22 +1455,29 @@ function bukaModalPemain(p){
   const overlay = document.getElementById('modalPemain');
   const isi = document.getElementById('modalPemainIsi');
 
-  const statUtama = p.gk ? `
-    <div class="modal-stat"><b>${p.main}</b><span>Main</span></div>
-    <div class="modal-stat"><b>${p.gkMenang??0}</b><span>Menang</span></div>
-    <div class="modal-stat"><b>${p.gkKalah??0}</b><span>Kalah</span></div>
-    <div class="modal-stat"><b>${p.gkCleanSheet??0}</b><span>Clean Sheet</span></div>
-    <div class="modal-stat"><b>${p.gkSave??0}</b><span>Save</span></div>
-    <div class="modal-stat"><b>${p.gkTembakanDihadapi??0}</b><span>Tembakan Dihadapi</span></div>
-    <div class="modal-stat"><b>${p.gkKemasukan??0}</b><span>Kemasukan</span></div>
-    <div class="modal-stat"><b>${p.rating.toFixed(1)}</b><span>Rating</span></div>
-  ` : `
-    <div class="modal-stat"><b>${p.main}</b><span>Main</span></div>
-    <div class="modal-stat"><b>${p.gol}</b><span>Gol</span></div>
-    <div class="modal-stat"><b>${p.assist}</b><span>Assist</span></div>
-    <div class="modal-stat"><b>${p.rating.toFixed(1)}</b><span>Rating</span></div>
-    <div class="modal-stat"><b>${p.motmMusim??0}</b><span>MOTM (Semua Laga)</span></div>
-  `;
+  // Hanya tampilkan kotak statistik yang datanya ada (null = tidak tersedia).
+  const kotakStat = (nilai, label) => (nilai === undefined || nilai === null) ? ''
+    : `<div class="modal-stat"><b>${nilai}</b><span>${label}</span></div>`;
+  const persen = v => (v === undefined || v === null) ? null : v + '%';
+  const statUtama = p.gk ? [
+    kotakStat(p.main, 'Main'),
+    kotakStat(p.gkCleanSheet ?? 0, 'Clean Sheet'),
+    kotakStat(persen(p.winRate), 'Win Rate'),
+    kotakStat(persen(p.passAkurasi), 'Akurasi Passing'),
+    kotakStat(p.motmMusim ?? 0, 'MOTM (Semua Laga)'),
+    kotakStat(p.rating.toFixed(1), 'Rating'),
+  ].join('') : [
+    kotakStat(p.main, 'Main'),
+    kotakStat(p.gol, 'Gol'),
+    kotakStat(p.assist, 'Assist'),
+    kotakStat(p.rating.toFixed(1), 'Rating'),
+    kotakStat(p.motmMusim ?? 0, 'MOTM (Semua Laga)'),
+    kotakStat(persen(p.winRate), 'Win Rate'),
+    kotakStat(persen(p.passAkurasi), 'Akurasi Passing'),
+    kotakStat(persen(p.tekelAkurasi), 'Akurasi Tekel'),
+    kotakStat(persen(p.tembakanAkurasi), 'Akurasi Tembakan'),
+    kotakStat(p.kartuMerah, 'Kartu Merah'),
+  ].join('');
 
   isi.innerHTML = `
     <button class="modal-tutup" aria-label="Tutup">✕</button>
