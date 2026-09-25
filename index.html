@@ -118,6 +118,8 @@
   .pill .titik{width:7px;height:7px;border-radius:50%;background:var(--abu);}
   .pill.live .titik{background:var(--hijau);box-shadow:0 0 6px rgba(47,191,113,.7);}
   .pill.mati .titik{background:var(--merah);box-shadow:0 0 6px rgba(224,38,60,.6);}
+  .pill.basi .titik{background:var(--kuning);box-shadow:0 0 6px rgba(224,184,35,.6);}
+  .pill.basi{color:var(--kuning);}
 
   .grid-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
     gap:10px;margin-bottom:28px;}
@@ -583,6 +585,8 @@ async function eaGet(path){
     console.error(`[EA] Gagal ambil ${path}: HTTP ${r.status}${detail}`);
     throw new Error('EA ' + r.status + detail);
   }
+  const waktu = +r.headers.get('X-Data-Waktu');
+  if(waktu > 0) WAKTU_DATA_EA = WAKTU_DATA_EA ? Math.min(WAKTU_DATA_EA, waktu) : waktu;
   return r.json();
 }
 
@@ -815,6 +819,9 @@ function grafikTren(hasilAsli){
    ══════════════════════════════════════════════════════════ */
 let DATA = { squad: SQUAD_MANUAL, totals: TOTALS_MANUAL, hasil: HASIL_MANUAL, divisi: DIVISI_MANUAL };
 let SUMBER = 'cadangan';
+// Kapan data EA yang sedang tampil diambil (ms). Diisi dari header X-Data-Waktu
+// fungsi ea. Kalau beberapa data berbeda umur, dipakai yang PALING LAMA.
+let WAKTU_DATA_EA = null;
 
 // Status sortir tabel Statistik & grid Skuad — disimpan di luar render() supaya
 // tetap ingat pilihan user walau halaman di-render ulang (misal pas data EA masuk).
@@ -901,11 +908,38 @@ function pasangNav(){
   });
 }
 
+// Label sumber data yang jujur: selalu menyebut kapan data terakhir diambil dari EA.
+// Hijau = diperbarui dalam 1 jam terakhir, kuning = lebih lama dari itu.
+const BATAS_SEGAR_MS = 60 * 60 * 1000;
+function umurTeks(ms){
+  const menit = Math.floor(ms / 60000);
+  if(menit < 1) return 'baru saja';
+  if(menit < 60) return `${menit} menit lalu`;
+  const jam = Math.floor(menit / 60);
+  if(jam < 48) return `${jam} jam lalu`;
+  return `${Math.floor(jam / 24)} hari lalu`;
+}
+function formatWaktuWIB(ms, denganTanggal){
+  const opsi = { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Jakarta' };
+  if(denganTanggal){ opsi.day = 'numeric'; opsi.month = 'short'; }
+  return new Date(ms).toLocaleString('id-ID', opsi).replace('.', ':') + ' WIB';
+}
 function pillSumber(){
-  const kelas = SUMBER === 'ea' ? 'live' : 'mati';
-  const teks = SUMBER === 'ea'
-    ? 'Sumber: EA Pro Clubs (live)'
-    : `Server EA tidak terjangkau — menampilkan data cadangan (update terakhir: ${SNAPSHOT_TANGGAL})`;
+  let kelas, teks;
+  if(SUMBER !== 'ea'){
+    kelas = 'mati';
+    teks = `Data EA belum tersedia — menampilkan data cadangan (update terakhir: ${SNAPSHOT_TANGGAL})`;
+  } else if(!WAKTU_DATA_EA){
+    kelas = 'live';
+    teks = 'Data EA Pro Clubs';
+  } else {
+    const umur = Date.now() - WAKTU_DATA_EA;
+    const segar = umur <= BATAS_SEGAR_MS;
+    kelas = segar ? 'live' : 'basi';
+    teks = segar
+      ? `Data EA · diperbarui ${formatWaktuWIB(WAKTU_DATA_EA, false)} (${umurTeks(umur)})`
+      : `Data EA · terakhir diperbarui ${formatWaktuWIB(WAKTU_DATA_EA, true)} (${umurTeks(umur)})`;
+  }
   return `<div class="pill ${kelas}"><span class="titik"></span><span>${teks}</span></div>`;
 }
 
