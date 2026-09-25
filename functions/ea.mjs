@@ -83,6 +83,8 @@ export default async (req) => {
         'Access-Control-Allow-Origin': '*',
         'X-Sumber-Cache': entriCache.sumber === 'laptop' ? 'laptop' : 'hit',
         'X-Cache-Umur-Ms': String(umurCache),
+        // Kapan data ini diambil dari EA (ms sejak 1970) — dipakai label di situs.
+        'X-Data-Waktu': String(entriCache.waktu),
       },
     });
   }
@@ -108,6 +110,7 @@ export default async (req) => {
             'Content-Type': 'application/json; charset=utf-8',
             'Access-Control-Allow-Origin': '*',
             'X-Sumber-Cache': 'miss',
+            'X-Data-Waktu': String(Date.now()),
           },
         });
       }
@@ -129,6 +132,7 @@ export default async (req) => {
         'Access-Control-Allow-Origin': '*',
         'X-Sumber-Cache': 'stale',
         'X-Cache-Umur-Ms': String(Date.now() - entriCache.waktu),
+        'X-Data-Waktu': String(entriCache.waktu),
       },
     });
   }
